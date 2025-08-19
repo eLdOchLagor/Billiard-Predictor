@@ -1,6 +1,10 @@
 import numpy as np
 import cv2 as cv
 
+def mouseInput(event, x, y, flags, param):
+    if event == cv.EVENT_LBUTTONDOWN:
+        print(f"Mouse clicked at: ({x}, {y})")
+
 def detect_circles():
     img = cv.imread('testImage.jpg', cv.IMREAD_GRAYSCALE)
     img = cv.medianBlur(img, 5)
@@ -27,7 +31,7 @@ def detect_circles():
     else:
         cv.putText(cimg, "No circles detected.", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
-    #cv.imshow('detected circles', cimg)
+    #cv.imshow('main window', cimg)
     detect_lines(cimg)
     cv.waitKey(0)
 
@@ -78,9 +82,12 @@ def detect_lines(img):
             x1, y1, x2, y2 = line[0]
             cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-    cv.imshow('detected lines', img)
+    cv.imshow('main window', img)
 
 def main():
+    cv.namedWindow('main window')
+    cv.setMouseCallback('main window', mouseInput)
+
     detect_circles()
     #detect_circles_from_camera()
 
