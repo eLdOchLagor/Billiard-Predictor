@@ -27,7 +27,8 @@ def detect_circles():
     else:
         cv.putText(cimg, "No circles detected.", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
-    cv.imshow('detected circles', cimg)
+    #cv.imshow('detected circles', cimg)
+    detect_lines(cimg)
     cv.waitKey(0)
 
 def detect_circles_from_camera():
@@ -62,10 +63,22 @@ def detect_circles_from_camera():
         else:
             cv.putText(cimg, "No circles detected.", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
-        cv.imshow('detected circles', cimg)
+        #cv.imshow('detected circles', cimg)
+        detect_lines(cimg)
+
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
     cap.release()
+
+def detect_lines(img):
+    edges = cv.Canny(img, 50, 150, apertureSize=3)
+    lines = cv.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=100, maxLineGap=5)
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+    cv.imshow('detected lines', img)
 
 def main():
     detect_circles()
