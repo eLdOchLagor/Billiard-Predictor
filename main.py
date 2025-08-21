@@ -1,9 +1,16 @@
 import numpy as np
 import cv2 as cv
 
+click_positions = []
+
 def mouseInput(event, x, y, flags, param):
     if event == cv.EVENT_LBUTTONDOWN:
-        print(f"Mouse clicked at: ({x}, {y})")
+        if len(click_positions) < 4:
+            click_positions.append((x, y))
+            print(f"Mouse clicked at: ({x}, {y})")
+            print(f"Stored positions: {click_positions}")
+        else:
+            print("Already stored 4 positions.")
 
 def detect_circles():
     img = cv.imread('testImage.jpg', cv.IMREAD_GRAYSCALE)
@@ -20,7 +27,7 @@ def detect_circles():
         minRadius=10,
         maxRadius=16
     )
-
+    
     if circles is not None:
         circles = np.uint16(np.around(circles))
         for i in circles[0, :]:
@@ -59,11 +66,17 @@ def detect_circles_from_camera():
 
         if circles is not None:
             circles = np.uint16(np.around(circles))
-            for i in circles[0, :]:
-                # draw the outer circle
-                cv.circle(cimg, (i[0], i[1]), i[2], (0, 255, 0), 2)
-                # draw the center of the circle
-                cv.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
+            if len(click_positions) == 4:
+                pts = np.array(click_positions, np.int32)
+                for i in circles[0, :]:
+                    # Check if the circle center is inside the polygon
+                    result = cv.pointPolygonTest(pts, (int(i[0]), int(i[1])), False)
+                    if result > 0:
+                        # draw the outer circle
+                        cv.circle(cimg, (i[0], i[1]), i[2], (0, 255, 0), 2)
+                        # draw the center of the circle
+                        cv.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
+                
         else:
             cv.putText(cimg, "No circles detected.", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
@@ -82,14 +95,19 @@ def detect_lines(img):
             x1, y1, x2, y2 = line[0]
             cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
+    if len(click_positions) == 4:
+        pts = np.array(click_positions, np.int32)
+        pts_poly = pts.reshape((-1, 1, 2))
+        #cv.fillPoly(img, [pts_poly], (0, 0, 255))
+        cv.polylines(img, [pts_poly], True, (0, 0, 255), 2)
     cv.imshow('main window', img)
 
 def main():
     cv.namedWindow('main window')
     cv.setMouseCallback('main window', mouseInput)
 
-    detect_circles()
-    #detect_circles_from_camera()
+    #detect_circles()
+    detect_circles_from_camera()
 
     cv.destroyAllWindows()
 
