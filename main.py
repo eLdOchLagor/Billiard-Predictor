@@ -12,8 +12,8 @@ def mouseInput(event, x, y, flags, param):
         else:
             print("Already stored 4 positions.")
 
-def detect_circles():
-    img = cv.imread('testImage.jpg', cv.IMREAD_GRAYSCALE)
+def detect_circles(img):
+    #img = cv.imread('testImage.jpg', cv.IMREAD_GRAYSCALE)
     img = cv.medianBlur(img, 5)
     cimg = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
 
@@ -42,7 +42,7 @@ def detect_circles():
     detect_lines(cimg)
     cv.waitKey(0)
 
-def detect_circles_from_camera():
+def detect_circles_from_camera(img):
     cap = cv.VideoCapture(0)
 
     while True:
