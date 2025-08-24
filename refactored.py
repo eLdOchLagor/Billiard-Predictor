@@ -24,7 +24,10 @@ def perspective_transform(img):
 
 
 def detect_lines(img):
-    edges = cv.Canny(img, 50, 150, apertureSize=3)
+    cimg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    cimg = cv.medianBlur(cimg, 5)
+
+    edges = cv.Canny(cimg, 50, 150, apertureSize=3)
     lines = cv.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=100, maxLineGap=5)
     if lines is not None:
         for line in lines:
@@ -36,14 +39,17 @@ def detect_lines(img):
         pts_poly = pts.reshape((-1, 1, 2))
         #cv.fillPoly(img, [pts_poly], (0, 0, 255))
         cv.polylines(img, [pts_poly], True, (0, 0, 255), 2)
+
+    return img
     #cv.imshow('main window', img)
 
 def detect_circles(img):
-    img = cv.medianBlur(img, 5)
-    cimg = cv.cvtColor(img, cv.COLOR_GRAY2BGR)
+    cimg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    cimg = cv.medianBlur(cimg, 5)
+    #cimg = cv.cvtColor(cimg, cv.COLOR_GRAY2BGR)
 
     circles = cv.HoughCircles(
-        img,
+        cimg,
         cv.HOUGH_GRADIENT,
         dp=1.2,
         minDist=10,
@@ -60,18 +66,19 @@ def detect_circles(img):
             for i in circles[0, :]:
                 result = cv.pointPolygonTest(pts, (int(i[0]), int(i[1])), False)
                 if result > 0:
-                    cv.circle(cimg, (i[0], i[1]), i[2], (0, 255, 0), 2)
-                    cv.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
+                    cv.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
+                    cv.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
         else:
-            cv.putText(cimg, "Click corners of table in clockwise order", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+            cv.putText(img, "Click corners of table in clockwise order", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
     else:
-        cv.putText(cimg, "No circles detected.", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+        cv.putText(img, "No circles detected.", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
-    detect_lines(cimg)
+    img = detect_lines(img)
 
-    cimg = perspective_transform(cimg)
+    img = perspective_transform(img)
 
-    cv.imshow('main window', cimg)
+    return img
+    #cv.imshow('main window', cimg)
     
 
 def main():
@@ -85,9 +92,10 @@ def main():
         if not ret:
             break
 
-        img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-
-        detect_circles(img)
+        
+        
+        img = detect_circles(frame)
+        cv.imshow('main window', img)
 
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
