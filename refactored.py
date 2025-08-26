@@ -5,7 +5,7 @@ click_positions = []
 global lines
 global circles
 global cue_position
-
+global direction
 
 def mouseInput(event, x, y, flags, param):
     if event == cv.EVENT_LBUTTONDOWN:
@@ -56,8 +56,8 @@ def detect_lines(img):
 
             x1, y1, x2, y2 = line[0]
             direction = np.array([x2-x1, y2-y1])
-            startPoint = (cue_position + direction * 3).astype(int)
-            endPoint = (cue_position - direction * 3).astype(int)
+            startPoint = (cue_position + direction * 5).astype(int)
+            endPoint = (cue_position - direction * 5).astype(int)
             cv.line(img, tuple(startPoint), tuple(endPoint), (255, 0, 0), 2)
             #print(direction)
 
